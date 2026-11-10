@@ -2,7 +2,8 @@
   const $ = (id) => document.getElementById(id);
   const SESSION_KEY = 'justdoit.user';
   const STATUS_LABEL = { PENDING: 'Pendiente', INPROGRESS: 'En progreso', DONE: 'Hecha' };
-
+  const NEXT_STATUS = { PENDING: 'INPROGRESS', INPROGRESS: 'DONE' };
+  
   let currentUser = null;
   let users = [];
   let tasks = [];
@@ -186,6 +187,8 @@
         await Api.tasks.update(targetUserId(), t.id, { status: select.value });
         await loadTasks();
       });
+      const next = NEXT_STATUS[t.status];
+      const advanceBtn = next? el('button', { class: 'btn primary small', title: 'Pasar a ' + STATUS_LABEL[next], onclick: () => advanceTask(t, next) }, 'Avanzar'): [];
       list.append(el('article', { class: 'card task ' + t.status },
         el('div', { class: 'row' }, el('span', { class: 'badge ' + t.status }, STATUS_LABEL[t.status] || t.status),
           el('span', { class: 'meta' }, '#' + t.id)),
@@ -193,8 +196,17 @@
         el('div', { class: 'meta' }, 'Límite: ' + (t.deadline || '-') + ' · Creada: ' + fmtDate(t.createdAt)),
         select,
         el('div', { class: 'row' },
+          advanceBtn,
           el('button', { class: 'btn ghost small', onclick: () => openTaskDialog(t) }, 'Editar'),
           el('button', { class: 'btn danger small', onclick: () => deleteTask(t) }, 'Eliminar'))));
+    });
+  }
+
+  function advanceTask(t, next) {
+    guard(async () => {
+      await Api.tasks.update(targetUserId(), t.id, { status: next });
+      toast(`Tarea #${t.id} está ${STATUS_LABEL[next].toLowerCase()}`);
+      await loadTasks();
     });
   }
 
