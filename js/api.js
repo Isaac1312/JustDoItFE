@@ -36,14 +36,18 @@ const Api = (() => {
   }
 
   return {
+
     onLog,
+
     users: {
       list: () => request('GET', '/users'),
       get: (id) => request('GET', `/users/${id}`),
+      getByUsername: (username) => request('GET', `/users/byusername/${encodeURIComponent(username)}`),
       create: (u) => request('POST', '/users', u),
       update: (id, u) => request('PATCH', `/users/${id}`, u),
       remove: (id) => request('DELETE', `/users/${id}`),
     },
+
     tasks: {
       list: (uid) => request('GET', `/users/${uid}/tasks`),
       get: (uid, id) => request('GET', `/users/${uid}/tasks/${id}`),
@@ -52,5 +56,7 @@ const Api = (() => {
       update: (uid, id, t) => request('PATCH', `/users/${uid}/tasks/${id}`, t),
       remove: (uid, id) => request('DELETE', `/users/${uid}/tasks/${id}`),
     },
+
   };
+
 })();
